@@ -2,9 +2,9 @@ import { Canvas } from "@react-three/fiber";
 import { Suspense, useContext, useEffect, useRef, useState } from "react";
 
 import sakura from "../assets/sakura.mp3";
-import { HomeInfo } from "../components";
+import { Footer, HomeInfo } from "../components";
 import { soundoff, soundon } from "../assets/icons";
-import { Bird, Island, Plane, Sky } from "../models";
+import { Bird, Plane,Island, Sky } from "../models";
 
 
 const Home = () => {
@@ -69,6 +69,7 @@ useEffect(() => {
   const [islandScale, islandPosition] = adjustIslandForScreenSize();
 
   return (
+    <div>
     <section className='w-full h-screen relative'>
       <div className='absolute top-28 left-0 right-0 z-10 flex items-center justify-center'>
         {currentStage && <HomeInfo currentStage={currentStage} />}
@@ -123,7 +124,11 @@ useEffect(() => {
           className='w-10 h-10 cursor-pointer object-contain'
         />
       </div>
+
     </section>
+
+    <Footer />
+    </div>
   );
 };
 

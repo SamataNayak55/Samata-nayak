@@ -28,7 +28,8 @@ export function Island({
     event.preventDefault();
 
     setIsRotating(true);
-    lastX.current = event.clientX;
+    const clientX = event.touches ? event.touches[0].clientX : event.clientX;
+    lastX.current = clientX;
   };
 
   const handlePointerUp = (event) => {
@@ -44,12 +45,13 @@ export function Island({
 
     if (!isRotating) return;
 
-    const delta = (event.clientX - lastX.current) / viewport.width;
+    const clientX = event.touches ? event.touches[0].clientX : event.clientX;
+    const delta = (clientX - lastX.current) / viewport.width;
     const rotationDelta = delta * 0.01 * Math.PI;
 
     islandRef.current.rotation.y += rotationDelta;
     rotationSpeed.current = rotationDelta;
-    lastX.current = event.clientX;
+    lastX.current = clientX;
   };
 
   /* -------------------- Keyboard Events -------------------- */
@@ -57,16 +59,14 @@ export function Island({
   const handleKeyDown = (event) => {
     if (event.key === "ArrowLeft") {
       if (!isRotating) setIsRotating(true);
-
-      islandRef.current.rotation.y += 0.005 * Math.PI;
-      rotationSpeed.current = 0.007;
+      islandRef.current.rotation.y += 0.01 * Math.PI;
+      rotationSpeed.current = 0.0125;
     }
 
     if (event.key === "ArrowRight") {
       if (!isRotating) setIsRotating(true);
-
-      islandRef.current.rotation.y -= 0.005 * Math.PI;
-      rotationSpeed.current = -0.007;
+      islandRef.current.rotation.y -= 0.01 * Math.PI;
+      rotationSpeed.current = -0.0125;
     }
   };
 
@@ -96,7 +96,7 @@ export function Island({
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
     };
-  }, [gl, isRotating]);
+  }, [gl, handlePointerDown, handlePointerUp, handlePointerMove]);
 
   /* -------------------- Frame Loop -------------------- */
 
@@ -109,31 +109,37 @@ export function Island({
       }
 
       islandRef.current.rotation.y += rotationSpeed.current;
-      return;
-    }
+    } else {
+      const rotation = islandRef.current.rotation.y;
 
-    const rotation = islandRef.current.rotation.y;
+      const normalizedRotation =
+        ((rotation % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
 
-    const normalizedRotation =
-      ((rotation % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
-
-    switch (true) {
-      case normalizedRotation >= 5.45 && normalizedRotation <= 5.85:
-        setCurrentStage(4);
-        break;
-      case normalizedRotation >= 0.85 && normalizedRotation <= 1.3:
-        setCurrentStage(3);
-        break;
-      case normalizedRotation >= 2.4 && normalizedRotation <= 2.6:
-        setCurrentStage(2);
-        break;
-      case normalizedRotation >= 4.25 && normalizedRotation <= 4.75:
-        setCurrentStage(1);
-        break;
-      default:
-        setCurrentStage(null);
+      // Stage logic based on rotation
+      switch (true) {
+        case normalizedRotation >= 5.45 && normalizedRotation <= 5.85:
+          setCurrentStage(4);
+          break;
+        case normalizedRotation >= 0.85 && normalizedRotation <= 1.3:
+          setCurrentStage(3);
+          break;
+        case normalizedRotation >= 2.4 && normalizedRotation <= 2.6:
+          setCurrentStage(2);
+          break;
+        case normalizedRotation >= 4.25 && normalizedRotation <= 4.75:
+          setCurrentStage(1);
+          break;
+        default:
+          setCurrentStage(null);
+      }
     }
   });
+
+  // Safety Check: If nodes aren't loaded yet, don't try to render them
+  if (!nodes || !nodes.polySurface944_tree_body_0) {
+    console.log("Loading island nodes...");
+    return null;
+  }
 
   /* -------------------- Model -------------------- */
 
