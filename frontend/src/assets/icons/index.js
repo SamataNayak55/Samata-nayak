@@ -31,7 +31,7 @@ import bootstrap from './bootstrap.jpg'
 import python from './python.jpg'
 import sql from './sql.jpg'
 import socketIO from './socketIO.png'
-import webRTC from './webRTC.png'
+import webRTC from './webRtc.png'
 import light from './light.svg'
 import meetSphere from './meetSphere.svg'
 
